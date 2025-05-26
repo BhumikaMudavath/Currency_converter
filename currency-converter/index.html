@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Currency Converter</title>
+  <style>
+    body {
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #fff;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 36, 61, 0.8), rgba(255, 0, 128, 0.5));
+      z-index: 0;
+    }
+
+    .converter-container {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      width: 500px;    
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      background-color: #fff;
+      color: #000;
+      width: 220px;
+      max-width: 100%;
+      box-sizing: border-box;
+      appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 20px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .currency-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .currency-select {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      max-width: 220px;
+    }
+
+    .swap-button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .swap-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    button {
+      padding: 12px;
+      font-size: 16px;
+      background-color: #fff;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #f0f0f0;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    img.flag {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .bar-chart {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .bar-label {
+      width: 60px;
+      font-size: 14px;
+      text-align: right;
+      margin-right: 10px;
+    }
+
+    .bar-fill {
+      height: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    .bar-amount {
+      margin-left: 10px;
+      font-size: 14px;
+    }
+
+    #colorLegend {
+      color: white;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+      text-align: left;
+    }
+
+    #colorLegend span {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 5px;
+      vertical-align: middle;
+      border-radius: 3px;
+    }
+
+    .blueLine {
+      background-color: rgba(0, 123, 255, 0.7);
+    }
+
+    .pinkLine {
+      background-color: rgba(255, 0, 128, 0.7);
+    }
+
+    @media (max-width: 500px) {
+      .converter-container {
+        width: 90%;
+      }
+      .currency-group {
+        flex-direction: column;
+        gap: 5px;
+      }
+      .swap-button {
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="converter-container">
+    <h1>Currency Converter</h1>
+    <div>
+      <label for="amount">Enter Amount</label>
+      <input type="number" id="amount" placeholder="Amount" value="1000" />
+    </div>
+    <div class="currency-group">
+      <div>
+        <label for="fromCurrency">From</label>
+        <div class="currency-select">
+          <img id="fromFlag" class="flag" src="us.png" alt="US Flag" />
+          <select id="fromCurrency">
+            <option value="USD" data-flag="us.png" selected>USD - United States Dollar</option>
+            <option value="EUR" data-flag="eu.png">EUR - Euro</option>
+            <option value="GBP" data-flag="gb.png">GBP - British Pound</option>
+            <option value="JPY" data-flag="jp.png">JPY - Japanese Yen</option>
+            <option value="AUD" data-flag="au.png">AUD - Australian Dollar</option>
+            <option value="CAD" data-flag="ca.png">CAD - Canadian Dollar</option>
+            <option value="CHF" data-flag="ch.png">CHF - Swiss Franc</option>
+            <option value="CNY" data-flag="cn.png">CNY - Chinese Yuan</option>
+            <option value="INR" data-flag="in.png">INR - Indian Rupee</option>
+            <option value="BRL" data-flag="br.png">BRL - Brazilian Real</option>
+          </select>
+        </div>
+      </div>
+      <button class="swap-button" onclick="swapCurrencies()">⟷</button>
+      <div>
+        <label for="toCurrency">To</label>
+        <div class="currency-select">
+          <img id="toFlag" class="flag" src="in.png" alt="India Flag" />
+          <select id="toCurrency">
+            <option value="USD" data-flag="us.png">USD - United States Dollar</option>
+            <option value="EUR" data-flag="eu.png">EUR - Euro</option>
+            <option value="GBP" data-flag="gb.png">GBP - British Pound</option>
+            <option value="JPY" data-flag="jp.png">JPY - Japanese Yen</option>
+            <option value="AUD" data-flag="au.png">AUD - Australian Dollar</option>
+            <option value="CAD" data-flag="ca.png">CAD - Canadian Dollar</option>
+            <option value="CHF" data-flag="ch.png">CHF - Swiss Franc</option>
+            <option value="CNY" data-flag="cn.png">CNY - Chinese Yuan</option>
+            <option value="INR" data-flag="in.png" selected>INR - Indian Rupee</option>
+            <option value="BRL" data-flag="br.png">BRL - Brazilian Real</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <button onclick="convertCurrency()">Get Exchange Rate</button>
+    <div id="result"></div>
+    <div class="bar-chart" id="barChart" style="display: none;">
+      <div class="bar">
+        <span class="bar-label" id="fromLabel"></span>
+        <div class="bar-fill" id="fromBar"></div>
+        <span class="bar-amount" id="fromAmount"></span>
+      </div>
+      <div class="bar">
+        <span class="bar-label" id="toLabel"></span>
+        <div class="bar-fill" id="toBar"></div>
+        <span class="bar-amount" id="toAmount"></span>
+      </div>
+    </div>
+
+    <div id="colorLegend">
+      <div><span class="blueLine"></span> Amount in From Currency</div>
+      <div><span class="pinkLine"></span> Amount in To Currency</div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = '29c00b5a08990aa90dc00ec0';
+    const apiUrl = 'https://v6.exchangerate-api.com/v6/';
+
+    function updateFlag(selectElementId, flagElementId) {
+      const select = document.getElementById(selectElementId);
+      const flag = document.getElementById(flagElementId);
+      const selectedOption = select.options[select.selectedIndex];
+      flag.src = selectedOption.getAttribute('data-flag');
+      flag.alt = `${selectedOption.text} Flag`;
+    }
+
+    document.getElementById('fromCurrency').addEventListener('change', () => updateFlag('fromCurrency', 'fromFlag'));
+    document.getElementById('toCurrency').addEventListener('change', () => updateFlag('toCurrency', 'toFlag'));
+
+    function swapCurrencies() {
+      const fromSelect = document.getElementById('fromCurrency');
+      const toSelect = document.getElementById('toCurrency');
+      const tempValue = fromSelect.value;
+      fromSelect.value = toSelect.value;
+      toSelect.value = tempValue;
+      updateFlag('fromCurrency', 'fromFlag');
+      updateFlag('toCurrency', 'toFlag');
+    }
+
+    async function convertCurrency() {
+      const amount = parseFloat(document.getElementById('amount').value);
+      const fromCurrency = document.getElementById('fromCurrency').value;
+      const toCurrency = document.getElementById('toCurrency').value;
+
+      if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+      }
+
+      const response = await fetch(`${apiUrl}${apiKey}/latest/${fromCurrency}`);
+      const data = await response.json();
+
+      if (data.result === 'success') {
+        const rate = data.conversion_rates[toCurrency];
+        const convertedAmount = amount * rate;
+        document.getElementById('result').textContent = `${amount.toFixed(2)} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`;
+
+        document.getElementById('barChart').style.display = 'block';
+        const maxAmount = Math.max(amount, convertedAmount);
+        const fromBarWidth = (amount / maxAmount) * 100;
+        const toBarWidth = (convertedAmount / maxAmount) * 100;
+        const fromBar = document.getElementById('fromBar');
+        fromBar.style.width = fromBarWidth + '%';
+        fromBar.style.backgroundColor = 'rgba(0, 123, 255, 0.7)';
+        const toBar = document.getElementById('toBar');
+        toBar.style.width = toBarWidth + '%';
+        toBar.style.backgroundColor = 'rgba(255, 0, 128, 0.7)';
+        document.getElementById('fromLabel').textContent = fromCurrency;
+        document.getElementById('toLabel').textContent = toCurrency;
+        document.getElementById('fromAmount').textContent = amount.toFixed(2);
+        document.getElementById('toAmount').textContent = convertedAmount.toFixed(2);
+      } else {
+        alert('Failed to get exchange rate');
+      }
+    }
+
+    document.querySelector('button[onclick="convertCurrency()"]').addEventListener('click', () => {
+      document.getElementById('colorLegend').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
